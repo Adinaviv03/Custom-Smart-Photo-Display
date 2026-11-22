@@ -6,7 +6,11 @@ A desk photo frame built around an ESP32-S3 and a 1.54" 240x240 display. It show
 |---|---|---|
 | ![Front of the case](docs/images/case-front.jpg) | ![Back of the case](docs/images/case-back.jpg) | ![Side of the case](docs/images/case-side.jpg) |
 
-Videos: [loading screen](docs/videos/loading-screen.mp4), [game](docs/videos/game.mp4).
+| Loading screen | Game |
+|---|---|
+| [![Loading screen](docs/images/loading-screen.gif)](docs/videos/loading-screen.mp4) | [![Game](docs/images/game.gif)](docs/videos/game.mp4) |
+
+Click a clip to open the full video.
 
 ## Features
 
