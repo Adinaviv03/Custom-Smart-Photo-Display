@@ -41,7 +41,7 @@ Meter on volts for check 0, then on continuity. J1 pin 1 (the + mark) is the lef
 
 ## 4. Assemble the case
 
-Print the five parts in [case/stl/](../case/stl/). The three test prints in `case/stl/test_prints/` let you check the display fit and the openings first.
+Print the five parts in [case/stl/](../case/stl/). You also need four M2.5 screws. The three test prints in `case/stl/test_prints/` let you check the display fit and the openings first.
 
 ![Exploded view of the case](images/case-exploded.png)
 
@@ -51,7 +51,7 @@ Print the five parts in [case/stl/](../case/stl/). The three test prints in `cas
 4. Lay the plate over the display and battery.
 5. Place the board on the plate with the XIAO and breakout plugged in. Plug the display cable into the breakout and fold it around the board edge. Keep the bend at least 3 to 5 mm in radius, with no creases, and keep it from pulling on the connector latches. Plug the battery into J1 and check the polarity once more with the meter.
 6. Put the switch cap on the slide switch lever and the plunger over the button.
-7. Put the back shell on and close it with four screws, one in each corner.
+7. Put the back shell on and close it with four M2.5 screws, one in each corner.
 
 Then switch on and check the button, the slide switch, the USB-C opening and charging.
 

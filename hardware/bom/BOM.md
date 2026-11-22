@@ -38,5 +38,6 @@ Tip: buy 3 of the JST header (spares and a test-fit), and a spare 0603 resistor.
 | 1 | `case/stl/Case_plate.stl` |
 | 1 | `case/stl/Part_button_plunger.stl` |
 | 1 | `case/stl/Part_switch_cap.stl` |
+| 4 | M2.5 screws for the back shell, one per corner hole |
 
-Four screws close the back shell, one per corner hole. The size is not recorded yet.
+
