@@ -1,0 +1,21 @@
+Group,Reference,Qty,Description,Manufacturer,MPN,Supplier,Supplier PN,Fitted,Notes
+Carrier PCB,PCB,1,"Carrier PCB 60 x 42 mm, 2 layer, 1.6 mm, HASL","JLCPCB (fab)","hardware/pcb/fab/jlcpcb_gerbers.zip",JLCPCB,,Yes,"Upload the gerber zip. Order 5 (smallest quantity). No assembly, no stencil."
+Carrier PCB,J1,1,"JST PH 2-pin 2.0 mm header, vertical, top entry (LiPo connector)",JST,B2B-PH-K-S,Digi-Key,455-1704-ND,Yes,"Fits both ways round: check the battery wire polarity before soldering (see docs/assembly.md)."
+Carrier PCB,J2 J3,2,"1x9 female socket header 2.54 mm, 8.5 mm tall (display breakout)",Same Sky,SSK02-FPH-254-A9,Digi-Key,2223-SSK02-FPH-254-A9-ND,Yes,"One row each for the two 9-pin rows of the EYESPI breakout."
+Carrier PCB,U1 sockets,2,"1x7 female socket header 2.54 mm, 8.5 mm tall (XIAO)",Same Sky,SSK02-FPH-254-A7,Digi-Key,2223-SSK02-FPH-254-A7-ND,Yes,"Two rows of 7 for the XIAO."
+Carrier PCB,SW1,1,"Tactile switch 6 mm, through hole (the one button)",Omron,B3F-1000,Digi-Key,SW400-ND,Yes,"Any B3F-1000 style 6 mm 4-pin switch."
+Carrier PCB,SW2,1,"Slide switch SPDT, E-Switch EG1218 (battery on/off)",E-Switch,EG1218,Digi-Key,EG1903-ND,Yes,"Cuts the battery wire only. Check it is the 3-pin SPDT version before ordering."
+Carrier PCB,R1,1,"0 ohm resistor 0603",Yageo,RC0603JR-070RL,Digi-Key,311-0.0GRCT-ND,Optional,"Links D4 to the display backlight pin. Without it the backlight is always full brightness."
+Carrier PCB,TP1 TP2,2,"Test pads (part of the PCB, nothing to buy)",,,,,Yes,"TP2 is where the battery wire from the XIAO's BAT+ pad is soldered."
+Modules,U1,1,"Seeed Studio XIAO ESP32-S3 (not the Sense version), with 2 x 7 male pins soldered on",Seeed Studio,102010634,Seeed / Digi-Key,,Yes,"8 MB flash, USB-C, on-board LiPo charger."
+Modules,Display breakout,1,"Adafruit EYE SPI breakout 5613, with 2 x 9 male pins soldered on",Adafruit,5613,Adafruit,,Yes,"Plugs into J2 and J3."
+Modules,Display,1,"Adafruit 1.54in 240x240 IPS TFT display with microSD, ST7789",Adafruit,3787,Adafruit,,Yes,"The pin header soldered on the display is not used; it can be removed."
+Modules,Display cable,1,"18-pin 0.5 mm pitch FFC cable (display to breakout)",Adafruit,5462,Adafruit,,Yes,"Check the contacts face the right way at both ends (see docs/assembly.md)."
+Modules,Battery,1,"LiPo 3.7 V 1000 mAh, 503450 (about 5 x 34 x 50 mm), JST PH 2.0 mm plug",Generic,503450,,,Yes,"Check red = + at the connector with a meter before first use."
+Modules,microSD card,1,"microSD card (optional)",,,,,Optional,"Used by the game to save the high score."
+Wire,TP2 wire,1,"About 40 mm of 28-30 AWG insulated wire",,,,,Yes,"XIAO BAT+ pad to TP2."
+Case,Case_front,1,"3D print: front shell (display window, battery pocket)",,case/stl/Case_front.stl,,,Yes,
+Case,Case_back,1,"3D print: back shell",,case/stl/Case_back.stl,,,Yes,
+Case,Case_plate,1,"3D print: plate",,case/stl/Case_plate.stl,,,Yes,
+Case,Part_button_plunger,1,"3D print: button plunger",,case/stl/Part_button_plunger.stl,,,Yes,
+Case,Part_switch_cap,1,"3D print: slide switch cap",,case/stl/Part_switch_cap.stl,,,Yes,

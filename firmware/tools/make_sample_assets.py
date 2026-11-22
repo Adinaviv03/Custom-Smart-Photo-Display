@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+"""Generate the neutral sample assets that ship in the repository:
+
+  - sample photos (colour gradients with a label), written to photos.h
+  - four generic stickers (heart, star, smiley, cloud) for the loading screen and the game,
+    written to stickers.h
+
+The real frame used personal photos and pet pictures; those are not published. To use your
+own, run make_photos_h.py on a folder of photos, and replace stickers.h with your own sprites
+(same layout: RGB565 colour plus an 8-bit alpha, row by row, big and small versions).
+
+    python make_sample_assets.py ../photo_gallery
+"""
+import io
+import math
+import pathlib
+import subprocess
+import sys
+import tempfile
+
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
+
+HERE = pathlib.Path(__file__).parent
+
+
+def gradient(size, c1, c2):
+    img = Image.new("RGB", (size, size))
+    px = img.load()
+    for y in range(size):
+        for x in range(size):
+            t = (x + y) / (2 * size - 2)
+            px[x, y] = tuple(round(a + (b - a) * t) for a, b in zip(c1, c2))
+    return img
+
+
+def sample_photos(folder):
+    palettes = [((255, 126, 95), (254, 180, 123)), ((67, 206, 162), (24, 90, 157)),
+                ((142, 45, 226), (74, 0, 224)), ((250, 217, 97), (247, 107, 28)),
+                ((86, 171, 47), (168, 224, 99)), ((232, 67, 147), (253, 160, 133))]
+    try:
+        font = ImageFont.truetype("arial.ttf", 30)
+    except OSError:
+        font = ImageFont.load_default()
+    for i, (a, b) in enumerate(palettes, 1):
+        img = gradient(480, a, b)
+        d = ImageDraw.Draw(img)
+        d.ellipse((120, 120, 360, 360), outline="white", width=8)
+        d.text((240, 240), f"Sample photo {i}", fill="white", font=font, anchor="mm")
+        img.save(folder / f"sample_{i}.jpg", quality=95)
+
+
+# ---------- stickers ----------
+def shape(kind, s):
+    """Draw one sticker at 4x scale on a transparent canvas, return (image, outline mask)."""
+    big = s * 4
+    img = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    c = big / 2
+    if kind == "heart":
+        r = big * 0.22
+        d.ellipse((c - 2 * r, c - 1.6 * r, c, c + 0.4 * r), fill=(235, 60, 100))
+        d.ellipse((c, c - 1.6 * r, c + 2 * r, c + 0.4 * r), fill=(235, 60, 100))
+        d.polygon([(c - 1.93 * r, c - 0.1 * r), (c + 1.93 * r, c - 0.1 * r), (c, c + 2.1 * r)], fill=(235, 60, 100))
+    elif kind == "star":
+        pts = []
+        for k in range(10):
+            ang = -math.pi / 2 + k * math.pi / 5
+            rad = big * (0.42 if k % 2 == 0 else 0.18)
+            pts.append((c + rad * math.cos(ang), c + rad * math.sin(ang)))
+        d.polygon(pts, fill=(255, 205, 40))
+    elif kind == "smiley":
+        d.ellipse((big * .1, big * .1, big * .9, big * .9), fill=(255, 215, 60))
+        d.ellipse((big * .32, big * .35, big * .42, big * .5), fill=(60, 40, 20))
+        d.ellipse((big * .58, big * .35, big * .68, big * .5), fill=(60, 40, 20))
+        d.arc((big * .28, big * .3, big * .72, big * .72), 20, 160, fill=(60, 40, 20), width=int(big * .05))
+    else:  # cloud
+        col = (120, 190, 255)
+        d.ellipse((big * .1, big * .4, big * .5, big * .8), fill=col)
+        d.ellipse((big * .3, big * .2, big * .7, big * .7), fill=col)
+        d.ellipse((big * .5, big * .4, big * .9, big * .8), fill=col)
+        d.rectangle((big * .3, big * .55, big * .7, big * .8), fill=col)
+    return img
+
+
+def sticker(kind, s):
+    """Sticker with a white die-cut border and a soft shadow, s x s pixels."""
+    big = s * 4
+    art = shape(kind, s)
+    alpha = art.split()[3]
+    border = alpha.filter(ImageFilter.MaxFilter(4 * 2 + 1))              # ~2 px white border
+    shadow = border.filter(ImageFilter.GaussianBlur(big * 0.02))
+    canvas = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+    canvas.paste(Image.new("RGBA", (big, big), (0, 0, 0, 110)), (int(big * .015), int(big * .02)), shadow)
+    canvas.paste(Image.new("RGBA", (big, big), (255, 255, 255, 255)), (0, 0), border)
+    canvas.alpha_composite(art)
+    return canvas.resize((s, s), Image.LANCZOS)
+
+
+def c_sprite(name, im):
+    w, h = im.size
+    px = im.load()
+    rgb, alpha = [], []
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            rgb.append(((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3))
+            alpha.append(a)
+
+    def block(ctype, label, vals, fmt, per):
+        out = [f"const {ctype} {label}[] PROGMEM = {{"]
+        for i in range(0, len(vals), per):
+            out.append("  " + ",".join(fmt % v for v in vals[i:i + per]) + ",")
+        out.append("};")
+        return "\n".join(out)
+
+    return (block("uint16_t", f"{name}_rgb", rgb, "0x%04X", 16) + "\n" +
+            block("uint8_t", f"{name}_a", alpha, "0x%02X", 20) + "\n")
+
+
+def stickers_h(path):
+    kinds = ["heart", "star", "smiley", "cloud"]
+    big, small = 60, 32
+    out = ["// Auto-generated by tools/make_sample_assets.py: generic stickers for the loading screen",
+           "// (RGB565 colour + 8-bit alpha, row by row). Replace with your own sprites if you like.",
+           "#pragma once", "#include <Arduino.h>", "",
+           "const int N_STICKERS = 4;",
+           f"const int STICKER_W[N_STICKERS] = {{{', '.join([str(big)] * 4)}}};",
+           f"const int STICKER_H[N_STICKERS] = {{{', '.join([str(big)] * 4)}}};", ""]
+    for i, k in enumerate(kinds):
+        out.append(c_sprite(f"sticker{i}", sticker(k, big)))
+    out.append("const uint16_t *const STICKER_RGB[N_STICKERS] = {" + ", ".join(f"sticker{i}_rgb" for i in range(4)) + "};")
+    out.append("const uint8_t *const STICKER_A[N_STICKERS] = {" + ", ".join(f"sticker{i}_a" for i in range(4)) + "};")
+    out += ["", "// Small versions of the stickers for the game",
+            f"const int STICKER_S_W[N_STICKERS] = {{{', '.join([str(small)] * 4)}}};",
+            f"const int STICKER_S_H[N_STICKERS] = {{{', '.join([str(small)] * 4)}}};", ""]
+    for i, k in enumerate(kinds):
+        out.append(c_sprite(f"stickerS{i}", sticker(k, small)))
+    out.append("const uint16_t *const STICKER_S_RGB[N_STICKERS] = {" + ", ".join(f"stickerS{i}_rgb" for i in range(4)) + "};")
+    out.append("const uint8_t *const STICKER_S_A[N_STICKERS] = {" + ", ".join(f"stickerS{i}_a" for i in range(4)) + "};")
+    pathlib.Path(path).write_text("\n".join(out) + "\n")
+
+
+def main():
+    if len(sys.argv) != 2:
+        sys.exit("usage: make_sample_assets.py <sketch folder>")
+    sketch = pathlib.Path(sys.argv[1])
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = pathlib.Path(tmp)
+        sample_photos(tmp)
+        subprocess.run([sys.executable, str(HERE / "make_photos_h.py"), str(tmp), str(sketch / "photos.h")], check=True)
+    stickers_h(sketch / "stickers.h")
+    print("wrote", sketch / "stickers.h")
+
+
+if __name__ == "__main__":
+    main()

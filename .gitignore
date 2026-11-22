@@ -1,0 +1,26 @@
+# Private configuration: never commit
+firmware/photo_gallery/secrets.h
+firmware/photo_gallery/birthdays.h
+
+# Personal photos before conversion
+my_photos/
+photos/
+*.heic
+*.HEIC
+
+# Build output and editor files
+.pio/
+.vscode/
+build/
+__pycache__/
+*.bak
+*.kicad_prl
+*-backups/
+fp-info-cache
+~*.lck
+.DS_Store
+Thumbs.db
+
+# Local tool settings
+.claude/
+.mcp.json
